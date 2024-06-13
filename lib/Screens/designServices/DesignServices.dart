@@ -50,44 +50,44 @@ class DesignServicesScreen extends StatelessWidget {
                               'STANDARD PARTS BOOK',
                               style: TextStyle(
                                   fontSize: 18,
-                                  color: Colors.lightBlue,
+                                  color: Colors.blue,
                                   fontWeight: FontWeight.bold),
                             ),
                             SizedBox(height: 8),
                             _buildSubSection(
                               context,
                               'REPORTS',
-                              Colors.purple, // Sub-compartment heading color
+                              Colors.blue, // Blue color for headings
                               [
                                 'REPORT BY CMI NO',
                                 'REPORT BY MFG NO',
                                 'ADDENDUM CMI',
                                 'ADDENDUM MFG',
                               ],
-                              Colors.lightBlue,
+                              Colors.grey,
                             ),
                             SizedBox(height: 16),
                             _buildSubSection(
                               context,
                               'MAINTENANCE',
-                              Colors.purple, // Sub-compartment heading color
+                              Colors.blue, // Blue color for headings
                               [
                                 'MAINTAIN STD PART BOOK',
                                 'PRINT PAGE',
                               ],
-                              Colors.lightBlue,
+                              Colors.grey,
                             ),
                             SizedBox(height: 16),
                             _buildSubSection(
                               context,
                               'LOOKUP',
-                              Colors.purple, // Sub-compartment heading color
+                              Colors.blue, // Blue color for headings
                               [
                                 'IF YOU KNOW CMI NO',
                                 'IF YOU KNOW MFG NO',
                                 'LOOK-UP BY ANYTHING',
                               ],
-                              Colors.lightBlue,
+                              Colors.grey,
                             ),
                           ],
                         ),
@@ -99,19 +99,19 @@ class DesignServicesScreen extends StatelessWidget {
                             _buildSection(
                               context,
                               'STANDARD PART BOOK INDEX',
-                              Colors.blue,
+                              Colors.blue, // Blue color for headings
                               [
                                 'REPORT BY TITLE',
                                 'ADD TO OR MODIFY INDEX',
                                 'REPORT BY NUMBER',
                               ],
-                              Colors.blue,
+                              Colors.grey,
                             ),
                             SizedBox(height: 10), // Gap between sections
                             _buildSection(
                               context,
                               'MB LIST',
-                              Colors.orange,
+                              Colors.blue, // Blue color for headings
                               [
                                 'REPORT BY MB NUMBER',
                                 'REPORT BY DO3 NUMBER',
@@ -120,19 +120,19 @@ class DesignServicesScreen extends StatelessWidget {
                                 'MF INFO INPUT',
                                 'MF INFO REPORT',
                               ],
-                              Colors.orange,
+                              Colors.grey,
                             ),
                             SizedBox(height: 10), // Gap between sections
                             _buildSection(
                               context,
                               'PROM',
-                              Colors.indigo,
+                              Colors.blue, // Blue color for headings
                               [
                                 'PROM LISTING',
                                 'MODEL BY PROM',
                                 'PROM BY MODEL',
                               ],
-                              Colors.indigo,
+                              Colors.grey,
                             ),
                           ],
                         ),
@@ -149,13 +149,13 @@ class DesignServicesScreen extends StatelessWidget {
                         child: _buildSection(
                           context,
                           'CARD FILE',
-                          Colors.teal,
+                          Colors.blue, // Blue color for headings
                           [
                             'CARD FILE MAINTANCE',
                             'DO3 REV PEND REPORT',
                             'SUB LOG',
                           ],
-                          Colors.teal,
+                          Colors.grey,
                         ),
                       ),
                       Spacer(flex: 1),
@@ -286,7 +286,7 @@ class DesignServicesScreen extends StatelessWidget {
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14,
-            color: Colors.white,
+            color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
         ),

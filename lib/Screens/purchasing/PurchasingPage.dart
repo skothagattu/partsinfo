@@ -47,13 +47,13 @@ class PurchasingScreen extends StatelessWidget {
                           'PO NO',
                           'VEND CODE',
                           'HISTORY REPORT',
-                        ], Colors.lightBlue)),
+                        ], Colors.grey)),
                         SizedBox(width: 16), // Gap between sections
                         Expanded(child: _buildSection(context, 'STANDARD PARTS BOOK', Colors.pink, [
                           'LOOK UP BY CMI NO',
                           'LOOK UP BY MFG NO',
                           'STANDARD PART LOOK UP',
-                        ], Colors.blue)),
+                        ], Colors.grey)),
                       ],
                     ),
                   ),
@@ -66,12 +66,12 @@ class PurchasingScreen extends StatelessWidget {
                           '3 LETTER CODE BY COMPANY',
                           'REPORT FOR SINGLE CODE',
                           'LOOK UP, ADD AND EDIT',
-                        ], Colors.indigo)),
+                        ], Colors.grey)),
                         SizedBox(width: 16), // Gap between sections
                         Expanded(child: _buildSection(context, 'SAMPLES', Colors.pink, [
                           'SAMPLES',
                           'SAMPLES REPORT',
-                        ], Colors.teal)),
+                        ], Colors.grey)),
                       ],
                     ),
                   ),
@@ -132,7 +132,15 @@ class PurchasingScreen extends StatelessWidget {
     return Center( // Center the button if it's the only item in the last row
       child: GestureDetector(
         onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$text pressed')));
+          if (text == 'LOOK UP, ADD AND EDIT') {
+            js.context.callMethod('open', [
+              '/#/threelettercodeform', // Ensure this path is correct and matches your route
+              '_blank',
+              'width=800,height=700'
+            ]);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$text pressed')));
+          }
         },
         child: Container(
           alignment: Alignment.center,
@@ -152,7 +160,7 @@ class PurchasingScreen extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white,
+              color: Colors.black,
               fontWeight: FontWeight.bold,
             ),
           ),

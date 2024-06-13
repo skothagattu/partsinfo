@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'Screens/HomeScreen.dart';
 import 'Screens/designServices/DesignServices.dart';
 import 'Screens/library/LibraryPage.dart';
-import 'Screens/purchasing/PurchasingPage.dart'; // Import the new library page
+import 'Screens/purchasing/PurchasingPage.dart';
+import 'Screens/purchasing/ThreeLetterCodeFormScreen.dart'; // Import the new screen
 
 void main() {
   runApp(const MyApp());
@@ -22,7 +23,8 @@ class MyApp extends StatelessWidget {
         '/': (context) => const HomeScreen(),
         '/purchasing': (context) => const PurchasingScreen(),
         '/designservices': (context) => const DesignServicesScreen(),
-        '/library': (context) => const LibraryPage(), // Add the new library page
+        '/library': (context) => const LibraryPage(),
+        '/threelettercodeform': (context) => const ThreeLetterCodeFormScreen(), // Add the new route
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/') {
@@ -33,6 +35,8 @@ class MyApp extends StatelessWidget {
           return MaterialPageRoute(builder: (context) => const DesignServicesScreen());
         } else if (settings.name == '/library') {
           return MaterialPageRoute(builder: (context) => const LibraryPage());
+        } else if (settings.name == '/threelettercodeform') {
+          return MaterialPageRoute(builder: (context) => const ThreeLetterCodeFormScreen());
         }
         return null;
       },

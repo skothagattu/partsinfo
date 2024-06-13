@@ -30,27 +30,30 @@ class HomeScreen extends StatelessWidget {
             Expanded(
               child: GridView(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 5,
+                  crossAxisCount: 4,
                   mainAxisSpacing: 10,
                   crossAxisSpacing: 10,
+                  childAspectRatio: 2, // Adjust the aspect ratio to make the items smaller
                 ),
                 children: [
-                  _buildButton(context, 'PURCHASING', Colors.lightBlue, 1, 1, () {
+                  _buildButton(context, 'PURCHASING', Colors.lightBlue, () {
                     _openNewTab('/purchasing', 'Purchasing');
                   }),
-                  _buildButton(context, 'DESIGN SERVICES', Colors.blue, 1, 1, () {
+                  _buildButton(context, 'DESIGN SERVICES', Colors.blue, () {
                     _openNewTab('/designservices', 'Design Services');
                   }),
-                  _buildButton(context, 'LIBRARY', Colors.indigo, 1, 1, () {
+                  _buildButton(context, 'LIBRARY', Colors.indigo, () {
                     _openNewTab('/library', 'Library');
                   }),
-                  _buildButton(context, 'PART SUB LOG', Colors.cyan, 1, 1, null),
-                  _buildButton(context, 'CHERYL\'S DO3 REPORT', Colors.blueAccent, 2, 1, null),
-                  _buildButton(context, 'DO3 NUMBERS', Colors.lightBlueAccent, 1, 2, null),
-                  _buildButton(context, 'DWG NUMBERS', Colors.deepPurpleAccent, 1, 1, null),
-                  _buildButton(context, 'ECO LOG', Colors.teal, 2, 1, null),
-                  _buildButton(context, 'CAB AIRE DWG NUMBERS', Colors.lightBlue, 1, 1, null),
-                  _buildButton(context, 'ECR LOG', Colors.deepPurple, 1, 2, null),
+                  _buildButton(context, 'PART SUB LOG', Colors.cyan, null),
+                  _buildButton(context, 'CHERYL\'S DO3 REPORT', Colors.blueAccent, null),
+                  _buildButton(context, 'DO3 NUMBERS', Colors.lightBlueAccent, null),
+                  _buildButton(context, 'DWG NUMBERS', Colors.deepPurpleAccent, null),
+                  _buildButton(context, 'ECO LOG', Colors.teal, null),
+                  Container(), // Empty container to push the last two buttons to the right
+                  Container(), // Another empty container to push the last two buttons to the right
+                  _buildButton(context, 'CAB AIRE DWG NUMBERS', Colors.lightBlue, null),
+                  _buildButton(context, 'ECR LOG', Colors.deepPurple, null),
                 ],
               ),
             ),
@@ -67,7 +70,7 @@ class HomeScreen extends StatelessWidget {
     js.context.callMethod('openNewTab', [newUrl, title]);
   }
 
-  Widget _buildButton(BuildContext context, String text, Color color, int rowSpan, int colSpan, VoidCallback? onTap) {
+  Widget _buildButton(BuildContext context, String text, Color color, VoidCallback? onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -83,13 +86,16 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0), // Adjust padding as needed
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),
