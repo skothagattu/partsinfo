@@ -14,7 +14,8 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
   ThreeLetterCode? currentCode;
   bool isLoading = true;
   String errorMessage = '';
-  bool isNewCodeTransactionActive = false; // New state variable
+  bool hasUnsavedChanges = false;
+  bool isNewCode = false;
 
   final TextEditingController codeController = TextEditingController();
   final TextEditingController typeController = TextEditingController();
@@ -32,12 +33,13 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
   final TextEditingController termsController = TextEditingController();
   final TextEditingController fobController = TextEditingController();
   final TextEditingController notesController = TextEditingController();
-  @override
 
+  @override
   void initState() {
     super.initState();
     _loadFirstCode();
   }
+
   void _populateFields() {
     if (currentCode != null) {
       codeController.text = currentCode!.code;
@@ -58,12 +60,13 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
       notesController.text = currentCode!.notes;
     }
   }
+
   Future<void> _loadFirstCode() async {
     setState(() {
       isLoading = true;
     });
     try {
-      final code = await apiService.fetchFirstCode();  // Fetch the first code using the new method
+      final code = await apiService.fetchFirstCode();
       setState(() {
         currentCode = code;
         _populateFields();
@@ -81,8 +84,8 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
   }
 
   Future<void> _loadNextCode() async {
-    if (isNewCodeTransactionActive) {
-      _showUnsavedChangesDialog();
+    if (hasUnsavedChanges && _hasDataInFields()) {
+      _showUnsavedChangesDialog(_loadNextCode);
       return;
     }
     if (currentCode != null) {
@@ -109,8 +112,8 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
   }
 
   Future<void> _loadPreviousCode() async {
-    if (isNewCodeTransactionActive) {
-      _showUnsavedChangesDialog();
+    if (hasUnsavedChanges && _hasDataInFields()) {
+      _showUnsavedChangesDialog(_loadPreviousCode);
       return;
     }
     if (currentCode != null && currentCode!.position > 1) {
@@ -135,9 +138,10 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
       }
     }
   }
+
   void _createNewCode() {
-    if (isNewCodeTransactionActive) {
-      _showNewCodeAlert();
+    if (hasUnsavedChanges && _hasDataInFields()) {
+      _showUnsavedChangesDialog(_createNewCode);
       return;
     }
     setState(() {
@@ -162,9 +166,11 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
         total: currentCode!.total + 1,
       );
       _clearFields();
-      isNewCodeTransactionActive = true;
+      hasUnsavedChanges = true;
+      isNewCode = true;
     });
   }
+
   void _clearFields() {
     codeController.clear();
     typeController.clear();
@@ -183,16 +189,38 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
     fobController.clear();
     notesController.clear();
   }
+
+  bool _hasDataInFields() {
+    return codeController.text.isNotEmpty ||
+        typeController.text.isNotEmpty ||
+        companyController.text.isNotEmpty ||
+        address1Controller.text.isNotEmpty ||
+        address2Controller.text.isNotEmpty ||
+        cityStateZipController.text.isNotEmpty ||
+        contact1Controller.text.isNotEmpty ||
+        phone1Controller.text.isNotEmpty ||
+        ext1Controller.text.isNotEmpty ||
+        contact2Controller.text.isNotEmpty ||
+        phone2Controller.text.isNotEmpty ||
+        ext2Controller.text.isNotEmpty ||
+        faxController.text.isNotEmpty ||
+        termsController.text.isNotEmpty ||
+        fobController.text.isNotEmpty ||
+        notesController.text.isNotEmpty;
+  }
+
   void _submitCode() async {
+    if (!hasUnsavedChanges) return;
     setState(() {
       isLoading = true;
     });
     try {
-      await apiService.createCode(currentCode!);  // Call the create API
+      await apiService.createCode(currentCode!);
       setState(() {
         isLoading = false;
         errorMessage = '';
-        isNewCodeTransactionActive = false;
+        hasUnsavedChanges = false;
+        isNewCode = false;
       });
     } catch (e) {
       setState(() {
@@ -202,45 +230,32 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
       print('Error: $e');
     }
   }
-  void _showNewCodeAlert() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Unsaved New Code'),
-          content: Text('You have an unsaved new code. Would you like to submit it or cancel?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _submitCode();
-              },
-              child: Text('Submit'),
-            ),
-          ],
-        );
-      },
-    );
+
+  void _cancelNewCode() {
+    setState(() {
+      isNewCode = false;
+      hasUnsavedChanges = false;
+    });
+    _clearFields();
+    _loadFirstCode();
   }
 
-  void _showUnsavedChangesDialog() {
+  void _showUnsavedChangesDialog(VoidCallback proceedAction) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text('Unsaved Changes'),
-          content: Text('You have unsaved changes. Would you like to submit them or discard?'),
+          content: Text('You have unsaved changes. Would you like to submit them, discard, or cancel?'),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _loadFirstCode(); // or any other appropriate action
+                setState(() {
+                  hasUnsavedChanges = false;
+                  _clearFields();
+                });
+                proceedAction();
               },
               child: Text('Discard'),
             ),
@@ -248,14 +263,22 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
                 _submitCode();
+                proceedAction();
               },
               child: Text('Submit'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
             ),
           ],
         );
       },
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -264,7 +287,13 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.of(context).pop();
+            if (hasUnsavedChanges && _hasDataInFields()) {
+              _showUnsavedChangesDialog(() {
+                Navigator.of(context).pop();
+              });
+            } else {
+              Navigator.of(context).pop();
+            }
           },
         ),
       ),
@@ -272,8 +301,8 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
         padding: const EdgeInsets.all(16.0),
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height - 100, // Adjust height as needed
-            maxWidth: MediaQuery.of(context).size.width - 100, // Adjust width as needed
+            maxHeight: MediaQuery.of(context).size.height - 100,
+            maxWidth: MediaQuery.of(context).size.width - 100,
           ),
           child: SingleChildScrollView(
             child: Column(
@@ -288,50 +317,80 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
                       children: [
                         _buildFormFields(),
                         SizedBox(height: 20),
+                        if (!isNewCode)
+                          ElevatedButton(
+                            onPressed: _createNewCode,
+                            child: Icon(Icons.add),
+                          ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            ElevatedButton(
-                              onPressed: _submitCode,
-                              child: Text('Submit'),
-                            ),
-                            SizedBox(width: 20),
-                            ElevatedButton(
-                              onPressed: _createNewCode,
-                              child: Icon(Icons.add),
-                            ),
+                            if (isNewCode) ...[
+                              ElevatedButton(
+                                onPressed: _submitCode,
+                                child: Text('Submit'),
+                              ),
+                              SizedBox(width: 20),
+                              ElevatedButton(
+                                onPressed: _clearFields,
+                                child: Text('Clear'),
+                              ),
+                              SizedBox(width: 20),
+                              ElevatedButton(
+                                onPressed: _cancelNewCode,
+                                child: Text('Cancel'),
+                              ),
+                            ],
                           ],
                         ),
-
-                        // Center(
-                        //   child: ElevatedButton(
-                        //     onPressed: _submitCode,
-                        //     child: Text('Submit'),
-                        //   ),
-                        // ),
                         SizedBox(height: 20),
                         Row(
                           children: [
                             IconButton(
                               icon: Icon(Icons.first_page),
-                              onPressed: _loadFirstCode,
+                              onPressed: isNewCode
+                                  ? null
+                                  : () {
+                                if (hasUnsavedChanges && _hasDataInFields()) {
+                                  _showUnsavedChangesDialog(_loadFirstCode);
+                                } else {
+                                  _loadFirstCode();
+                                }
+                              },
                             ),
                             IconButton(
                               icon: Icon(Icons.navigate_before),
-                              onPressed: currentCode!.position > 1 ? _loadPreviousCode : null,
+                              onPressed: isNewCode
+                                  ? null
+                                  : currentCode!.position > 1
+                                  ? () {
+                                if (hasUnsavedChanges && _hasDataInFields()) {
+                                  _showUnsavedChangesDialog(_loadPreviousCode);
+                                } else {
+                                  _loadPreviousCode();
+                                }
+                              }
+                                  : null,
                             ),
                             Spacer(),
-                            if (currentCode != null) Text('${currentCode!.position} of ${currentCode!.total}'),
+                            if (currentCode != null)
+                              Text('${currentCode!.position} of ${currentCode!.total}'),
                             Spacer(),
                             IconButton(
                               icon: Icon(Icons.navigate_next),
-                              onPressed: _loadNextCode,
+                              onPressed: isNewCode
+                                  ? null
+                                  : () {
+                                if (hasUnsavedChanges && _hasDataInFields()) {
+                                  _showUnsavedChangesDialog(_loadNextCode);
+                                } else {
+                                  _loadNextCode();
+                                }
+                              },
                             ),
                             IconButton(
                               icon: Icon(Icons.last_page),
-                              onPressed: () {
-                                // Add functionality to load last code if required
-                              },
+                              onPressed: isNewCode ? null : () {},
                             ),
                           ],
                         ),
@@ -344,6 +403,7 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
       ),
     );
   }
+
   Widget _buildFormFields() {
     return Column(
       children: [
@@ -435,6 +495,11 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
           fillColor: Colors.grey[200],
           border: OutlineInputBorder(),
         ),
+        onChanged: (value) {
+          setState(() {
+            hasUnsavedChanges = true;
+          });
+        },
       ),
     );
   }
