@@ -128,7 +128,12 @@ class PurchasingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPurchasingButton(BuildContext context, String text, Color color) {
+  Widget _buildPurchasingButton(BuildContext context, String text, Color defaultColor) {
+    Color buttonColor = defaultColor;
+    if (text == 'LOOK UP' || text == 'ADD' || text == 'EDIT' || text == 'LOOK UP, ADD AND EDIT') {
+      buttonColor = Colors.green;
+    }
+
     return Center( // Center the button if it's the only item in the last row
       child: GestureDetector(
         onTap: () {
@@ -136,7 +141,7 @@ class PurchasingScreen extends StatelessWidget {
             js.context.callMethod('open', [
               '/#/threelettercodeform', // Ensure this path is correct and matches your route
               '_blank',
-              'width=800,height=700'
+              'width=800,height=800'
             ]);
           } else {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$text pressed')));
@@ -145,7 +150,7 @@ class PurchasingScreen extends StatelessWidget {
         child: Container(
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: color,
+            color: buttonColor,
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(

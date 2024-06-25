@@ -16,6 +16,8 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
   String errorMessage = '';
   bool hasUnsavedChanges = false;
   bool isNewCode = false;
+  List<ThreeLetterCode> searchResults = [];
+  int currentSearchIndex = 0;
 
   final TextEditingController codeController = TextEditingController();
   final TextEditingController typeController = TextEditingController();
@@ -33,6 +35,7 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
   final TextEditingController termsController = TextEditingController();
   final TextEditingController fobController = TextEditingController();
   final TextEditingController notesController = TextEditingController();
+  final TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
@@ -82,7 +85,27 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
       print('Error: $e');
     }
   }
-
+  Future<void> _loadLastCode() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      final code = await apiService.fetchLastCode();
+      setState(() {
+        currentCode = code;
+        _populateFields();
+        isLoading = false;
+        errorMessage = '';
+      });
+      print('Loaded Last code: ${code.code}');
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        errorMessage = 'Failed to load data: $e';
+      });
+      print('Error: $e');
+    }
+  }
   Future<void> _loadNextCode() async {
     if (hasUnsavedChanges && _hasDataInFields()) {
       _showUnsavedChangesDialog(_loadNextCode);
@@ -139,36 +162,49 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
     }
   }
 
-  void _createNewCode() {
+  void _createNewCode() async {
     if (hasUnsavedChanges && _hasDataInFields()) {
       _showUnsavedChangesDialog(_createNewCode);
       return;
     }
     setState(() {
-      currentCode = ThreeLetterCode(
-        code: '',
-        type: '',
-        company: '',
-        addresS1: '',
-        addresS2: '',
-        citY_STATE_ZIP: '',
-        contacT1: '',
-        phonE1: '',
-        exT1: '',
-        contacT2: '',
-        phonE2: '',
-        exT2: '',
-        fax: '',
-        terms: '',
-        fob: '',
-        notes: '',
-        position: currentCode!.total + 1,
-        total: currentCode!.total + 1,
-      );
-      _clearFields();
-      hasUnsavedChanges = true;
-      isNewCode = true;
+      isLoading = true;
     });
+    try {
+      final lastCode = await apiService.fetchLastCode(); // Ensure you have this method implemented
+      setState(() {
+        currentCode = ThreeLetterCode(
+          code: '',
+          type: '',
+          company: '',
+          addresS1: '',
+          addresS2: '',
+          citY_STATE_ZIP: '',
+          contacT1: '',
+          phonE1: '',
+          exT1: '',
+          contacT2: '',
+          phonE2: '',
+          exT2: '',
+          fax: '',
+          terms: '',
+          fob: '',
+          notes: '',
+          position: lastCode.total + 1,
+          total: lastCode.total + 1,
+        );
+        _clearFields();
+        hasUnsavedChanges = true;
+        isNewCode = true;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        errorMessage = 'Failed to create new code: $e';
+      });
+      print('Error: $e');
+    }
   }
 
   void _clearFields() {
@@ -188,7 +224,12 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
     termsController.clear();
     fobController.clear();
     notesController.clear();
+    setState(() {
+      hasUnsavedChanges = false;
+      isNewCode = false;
+    });
   }
+
 
   bool _hasDataInFields() {
     return codeController.text.isNotEmpty ||
@@ -210,34 +251,87 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
   }
 
   void _submitCode() async {
-    if (!hasUnsavedChanges) return;
+    if (!hasUnsavedChanges) return; // Avoid submitting if there are no unsaved changes
+    if (codeController.text.isEmpty || typeController.text.isEmpty || companyController.text.isEmpty) {
+      setState(() {
+        errorMessage = 'Code, Type, and Company are required fields.';
+      });
+      return;
+    }
     setState(() {
       isLoading = true;
     });
     try {
-      await apiService.createCode(currentCode!);
+      final newCode = ThreeLetterCode(
+        code: codeController.text,
+        type: typeController.text,
+        company: companyController.text,
+        addresS1: address1Controller.text,
+        addresS2: address2Controller.text,
+        citY_STATE_ZIP: cityStateZipController.text,
+        contacT1: contact1Controller.text,
+        phonE1: phone1Controller.text,
+        exT1: ext1Controller.text,
+        contacT2: contact2Controller.text,
+        phonE2: phone2Controller.text,
+        exT2: ext2Controller.text,
+        fax: faxController.text,
+        terms: termsController.text,
+        fob: fobController.text,
+        notes: notesController.text,
+        position: currentCode!.position, // Ensure the position is correct
+        total: currentCode!.total, // Ensure the total is correct
+      );
+
+      await apiService.createCode(newCode);
       setState(() {
         isLoading = false;
         errorMessage = '';
         hasUnsavedChanges = false;
-        isNewCode = false;
+        isNewCode = false; // Reset the new code state
+        currentCode = newCode;
       });
     } catch (e) {
       setState(() {
         isLoading = false;
-        errorMessage = 'Failed to create code: $e';
       });
+      _showErrorMessageDialog(e.toString());
       print('Error: $e');
     }
   }
-
+  void _showErrorMessageDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _clearFields();
+              },
+              child: Text('Discard'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
   void _cancelNewCode() {
     setState(() {
+      _clearFields();
       isNewCode = false;
       hasUnsavedChanges = false;
+      _loadFirstCode();
     });
-    _clearFields();
-    _loadFirstCode();
   }
 
   void _showUnsavedChangesDialog(VoidCallback proceedAction) {
@@ -278,24 +372,72 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
       },
     );
   }
+  void _searchCode() async {
+    if (searchController.text.isEmpty) {
+      setState(() {
+        errorMessage = 'Search field cannot be empty.';
+      });
+      return;
+    }
+    setState(() {
+      isLoading = true;
+      errorMessage = '';
+      searchResults.clear();
+      currentSearchIndex = 0;
+    });
+    try {
+      final results = await apiService.searchCode(searchController.text);
+      setState(() {
+        searchResults = results as List<ThreeLetterCode>;
+        if (searchResults.isNotEmpty) {
+          currentCode = searchResults.first;
+          _populateFields();
+        } else {
+          errorMessage = 'No results found.';
+        }
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        errorMessage = 'Failed to search code: $e';
+      });
+      print('Error: $e');
+    }
+  }
+  void _clearSearch() {
+    setState(() {
+      searchController.clear();
+      searchResults.clear();
+      currentSearchIndex = 0;
+      _loadFirstCode();
+    });
+  }
+  void _loadNextSearchResult() {
+    if (currentSearchIndex < searchResults.length - 1) {
+      setState(() {
+        currentSearchIndex++;
+        currentCode = searchResults[currentSearchIndex];
+        _populateFields();
+      });
+    }
+  }
+
+  void _loadPreviousSearchResult() {
+    if (currentSearchIndex > 0) {
+      setState(() {
+        currentSearchIndex--;
+        currentCode = searchResults[currentSearchIndex];
+        _populateFields();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('3 Letter Code Look Up & Add'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            if (hasUnsavedChanges && _hasDataInFields()) {
-              _showUnsavedChangesDialog(() {
-                Navigator.of(context).pop();
-              });
-            } else {
-              Navigator.of(context).pop();
-            }
-          },
-        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -315,6 +457,8 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
                 else if (currentCode != null)
                     Column(
                       children: [
+                        _buildSearchBar(),
+                        SizedBox(height: 20),
                         _buildFormFields(),
                         SizedBox(height: 20),
                         if (!isNewCode)
@@ -322,10 +466,10 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
                             onPressed: _createNewCode,
                             child: Icon(Icons.add),
                           ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (isNewCode) ...[
+                        if (isNewCode)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
                               ElevatedButton(
                                 onPressed: _submitCode,
                                 child: Text('Submit'),
@@ -341,10 +485,13 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
                                 child: Text('Cancel'),
                               ),
                             ],
-                          ],
-                        ),
+                          ),
                         SizedBox(height: 20),
-                        Row(
+                        if (searchResults.isEmpty || searchResults.length == 1)
+                          _buildNavigationButtons(),
+                        if (searchResults.length > 1)
+                          _buildSearchNavigationButtons(),
+                        /*Row(
                           children: [
                             IconButton(
                               icon: Icon(Icons.first_page),
@@ -390,10 +537,18 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
                             ),
                             IconButton(
                               icon: Icon(Icons.last_page),
-                              onPressed: isNewCode ? null : () {},
+                              onPressed: isNewCode
+                                  ? null
+                                  : () {
+                                if (hasUnsavedChanges && _hasDataInFields()) {
+                                  _showUnsavedChangesDialog(_loadLastCode);
+                                } else {
+                                  _loadLastCode();
+                                }
+                              },
                             ),
                           ],
-                        ),
+                        ),*/
                       ],
                     ),
               ],
@@ -401,6 +556,108 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
           ),
         ),
       ),
+    );
+  }
+  Widget _buildSearchBar() {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: searchController,
+            decoration: InputDecoration(
+              labelText: 'Search Code',
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ),
+        SizedBox(width: 10),
+        ElevatedButton(
+          onPressed: _searchCode,
+          child: Text('Search'),
+        ),
+        SizedBox(width: 10),
+        ElevatedButton(
+          onPressed: _clearSearch,
+          child: Text('Clear'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNavigationButtons() {
+    return Row(
+      children: [
+        IconButton(
+          icon: Icon(Icons.first_page),
+          onPressed: isNewCode
+              ? null
+              : () {
+            if (hasUnsavedChanges && _hasDataInFields()) {
+              _showUnsavedChangesDialog(_loadFirstCode);
+            } else {
+              _loadFirstCode();
+            }
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.navigate_before),
+          onPressed: isNewCode
+              ? null
+              : currentCode!.position > 1
+              ? () {
+            if (hasUnsavedChanges && _hasDataInFields()) {
+              _showUnsavedChangesDialog(_loadPreviousCode);
+            } else {
+              _loadPreviousCode();
+            }
+          }
+              : null,
+        ),
+        Spacer(),
+        if (currentCode != null) Text('${currentCode!.position} of ${currentCode!.total}'),
+        Spacer(),
+        IconButton(
+          icon: Icon(Icons.navigate_next),
+          onPressed: isNewCode
+              ? null
+              : () {
+            if (hasUnsavedChanges && _hasDataInFields()) {
+              _showUnsavedChangesDialog(_loadNextCode);
+            } else {
+              _loadNextCode();
+            }
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.last_page),
+          onPressed: isNewCode
+              ? null
+              : () {
+            if (hasUnsavedChanges && _hasDataInFields()) {
+              _showUnsavedChangesDialog(_loadLastCode);
+            } else {
+              _loadLastCode();
+            }
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSearchNavigationButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: currentSearchIndex > 0 ? _loadPreviousSearchResult : null,
+        ),
+        Text('${currentSearchIndex + 1} of ${searchResults.length}'),
+        IconButton(
+          icon: Icon(Icons.arrow_forward),
+          onPressed: currentSearchIndex < searchResults.length - 1 ? _loadNextSearchResult : null,
+        ),
+      ],
     );
   }
 

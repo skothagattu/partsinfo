@@ -14,6 +14,15 @@ class ApiService {
     }
   }
 
+  Future<ThreeLetterCode> fetchLastCode() async {
+    final response = await http.get(Uri.parse('$baseUrl/last')); // Updated endpoint
+    if (response.statusCode == 200) {
+      return ThreeLetterCode.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to load first code');
+    }
+  }
+
   Future<ThreeLetterCode> fetchNextCode(String currentCode) async {
     final response = await http.get(Uri.parse('$baseUrl/next/$currentCode'));
     if (response.statusCode == 200) {
@@ -32,28 +41,33 @@ class ApiService {
     }
   }
 
-  Future<ThreeLetterCode> searchCode(String searchTerm) async {
+
+  Future<List<ThreeLetterCode>> searchCode(String searchTerm) async {
     final response = await http.get(Uri.parse('$baseUrl/search/$searchTerm'));
     if (response.statusCode == 200) {
       List<dynamic> list = json.decode(response.body);
-      if (list.isNotEmpty) {
-        return ThreeLetterCode.fromJson(list[0]);
-      } else {
-        throw Exception('No code found');
-      }
+      return list.map((e) => ThreeLetterCode.fromJson(e)).toList();
     } else {
       throw Exception('Failed to search code');
     }
   }
 
   Future<void> createCode(ThreeLetterCode threeLetterCode) async {
+    final jsonData = json.encode(threeLetterCode.toJson());
+    print('Sending JSON data: $jsonData');
     final response = await http.post(
       Uri.parse('$baseUrl/create'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode(threeLetterCode.toJson()),
+      body: jsonData,
     );
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
     if (response.statusCode != 200) {
-      throw Exception('Failed to create code');
+      if (response.statusCode == 409) {
+        throw Exception('Code already exists. Please create a unique code.');
+      } else {
+        throw Exception('Failed to create code');
+      }
     }
   }
 }
