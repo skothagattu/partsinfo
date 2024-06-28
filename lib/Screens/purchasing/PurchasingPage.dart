@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:js' as js;
 
+import 'ThreeLetterCodeFormScreen.dart';
+
 class PurchasingScreen extends StatelessWidget {
   const PurchasingScreen({super.key});
 
@@ -138,11 +140,23 @@ class PurchasingScreen extends StatelessWidget {
       child: GestureDetector(
         onTap: () {
           if (text == 'LOOK UP, ADD AND EDIT') {
-            js.context.callMethod('open', [
-              '/#/threelettercodeform', // Ensure this path is correct and matches your route
-              '_blank',
-              'width=800,height=800'
-            ]);
+            // js.context.callMethod('open', [
+            //   '/#/threelettercodeform', // Ensure this path is correct and matches your route
+            //   '_blank',
+            //   'width=800,height=800'
+            // ]);
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return Dialog(
+                  child: Container(
+                    width: 800,
+                    height: 800,
+                    child: ThreeLetterCodeFormScreen(),
+                  ),
+                );
+              },
+            );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$text pressed')));
           }

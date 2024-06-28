@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'Screens/CabAireDWGNumbersFormScreen.dart';
+import 'Screens/D03NumbersFormScreen.dart';
+import 'Screens/DWGNumbersFormScreen.dart';
 import 'Screens/HomeScreen.dart';
+import 'Screens/PartSubLogFormScreen.dart';
 import 'Screens/designServices/DesignServices.dart';
 import 'Screens/library/LibraryPage.dart';
 import 'Screens/purchasing/PurchasingPage.dart';
@@ -25,6 +29,10 @@ class MyApp extends StatelessWidget {
         '/designservices': (context) => const DesignServicesScreen(),
         '/library': (context) => const LibraryPage(),
         '/threelettercodeform': (context) => const ThreeLetterCodeFormScreen(), // Add the new route
+        '/partsublogform': (context) => PartSubLogFormScreen(),
+        '/d03numbersform': (context) => D03NumbersFormScreen(),
+        '/dwgnumbersform': (context) => const DWGNumbersFormScreen(),
+        '/cabairedwgnumbersform': (context) => CabAireDWGNumberFormScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/') {

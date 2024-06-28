@@ -7,9 +7,14 @@ class ApiService {
 
   Future<ThreeLetterCode> fetchFirstCode() async {
     final response = await http.get(Uri.parse('$baseUrl/firstcode')); // Updated endpoint
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
     if (response.statusCode == 200) {
       return ThreeLetterCode.fromJson(json.decode(response.body));
-    } else {
+
+    }
+    else {
       throw Exception('Failed to load first code');
     }
   }
@@ -68,6 +73,17 @@ class ApiService {
       } else {
         throw Exception('Failed to create code');
       }
+    }
+  }
+  Future<void> updateCode(String code, ThreeLetterCode threeLetterCode) async {
+    final jsonData = json.encode(threeLetterCode.toJson());
+    final response = await http.put(
+      Uri.parse('$baseUrl/Update/$code'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonData,
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update code');
     }
   }
 }

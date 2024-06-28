@@ -12,6 +12,7 @@ class ThreeLetterCodeFormScreen extends StatefulWidget {
 class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
   final ApiService apiService = ApiService();
   ThreeLetterCode? currentCode;
+  ThreeLetterCode? originalCode;
   bool isLoading = true;
   String errorMessage = '';
   bool hasUnsavedChanges = false;
@@ -61,6 +62,7 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
       termsController.text = currentCode!.terms;
       fobController.text = currentCode!.fob;
       notesController.text = currentCode!.notes;
+      originalCode = currentCode?.copy();
     }
   }
 
@@ -299,6 +301,61 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
       print('Error: $e');
     }
   }
+  void _submitChanges() async {
+    if (!hasUnsavedChanges) return; // Avoid submitting if there are no unsaved changes
+    if (currentCode == null) return;
+
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      final updatedCode = ThreeLetterCode(
+        code: codeController.text,
+        type: typeController.text,
+        company: companyController.text,
+        addresS1: address1Controller.text,
+        addresS2: address2Controller.text,
+        citY_STATE_ZIP: cityStateZipController.text,
+        contacT1: contact1Controller.text,
+        phonE1: phone1Controller.text,
+        exT1: ext1Controller.text,
+        contacT2: contact2Controller.text,
+        phonE2: phone2Controller.text,
+        exT2: ext2Controller.text,
+        fax: faxController.text,
+        terms: termsController.text,
+        fob: fobController.text,
+        notes: notesController.text,
+        position: currentCode!.position,
+        total: currentCode!.total,
+      );
+
+      await apiService.updateCode(currentCode!.code, updatedCode);
+      setState(() {
+        currentCode = updatedCode;
+        originalCode = updatedCode.copy();
+        isLoading = false;
+        errorMessage = '';
+        hasUnsavedChanges = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        errorMessage = 'Failed to update code: $e';
+      });
+      print('Error: $e');
+    }
+  }
+
+  void _discardChanges() {
+    setState(() {
+      if (originalCode != null) {
+        currentCode = originalCode;
+        _populateFields();
+      }
+      hasUnsavedChanges = false;
+    });
+  }
   void _showErrorMessageDialog(String message) {
     showDialog(
       context: context,
@@ -486,6 +543,21 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
                               ),
                             ],
                           ),
+                        if (hasUnsavedChanges && !isNewCode)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton(
+                                onPressed: _submitChanges,
+                                child: Text('Submit Changes'),
+                              ),
+                              SizedBox(width: 20),
+                              ElevatedButton(
+                                onPressed: _discardChanges,
+                                child: Text('Discard Changes'),
+                              ),
+                            ],
+                          ),
                         SizedBox(height: 20),
                         if (searchResults.isEmpty || searchResults.length == 1)
                           _buildNavigationButtons(),
@@ -589,7 +661,7 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
       children: [
         IconButton(
           icon: Icon(Icons.first_page),
-          onPressed: isNewCode
+          onPressed: isNewCode || hasUnsavedChanges
               ? null
               : () {
             if (hasUnsavedChanges && _hasDataInFields()) {
@@ -601,7 +673,7 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
         ),
         IconButton(
           icon: Icon(Icons.navigate_before),
-          onPressed: isNewCode
+          onPressed: isNewCode || hasUnsavedChanges
               ? null
               : currentCode!.position > 1
               ? () {
@@ -618,7 +690,7 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
         Spacer(),
         IconButton(
           icon: Icon(Icons.navigate_next),
-          onPressed: isNewCode
+          onPressed: isNewCode || hasUnsavedChanges
               ? null
               : () {
             if (hasUnsavedChanges && _hasDataInFields()) {
@@ -630,7 +702,7 @@ class _ThreeLetterCodeFormScreenState extends State<ThreeLetterCodeFormScreen> {
         ),
         IconButton(
           icon: Icon(Icons.last_page),
-          onPressed: isNewCode
+          onPressed: isNewCode || hasUnsavedChanges
               ? null
               : () {
             if (hasUnsavedChanges && _hasDataInFields()) {

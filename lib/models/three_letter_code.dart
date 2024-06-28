@@ -39,6 +39,28 @@ class ThreeLetterCode {
     required this.total,
   });
 
+  ThreeLetterCode copy() {
+    return ThreeLetterCode(
+      code: code,
+      type: type,
+      company: company,
+      addresS1: addresS1,
+      addresS2: addresS2,
+      citY_STATE_ZIP: citY_STATE_ZIP,
+      contacT1: contacT1,
+      phonE1: phonE1,
+      exT1: exT1,
+      contacT2: contacT2,
+      phonE2: phonE2,
+      exT2: exT2,
+      fax: fax,
+      terms: terms,
+      fob: fob,
+      notes: notes,
+      position: position,
+      total: total,
+    );
+  }
   factory ThreeLetterCode.fromJson(Map<String, dynamic> json) {
     return ThreeLetterCode(
       code: json['code'] ?? ' ',

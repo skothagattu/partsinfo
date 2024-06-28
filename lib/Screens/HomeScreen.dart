@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:js' as js;
 
+import 'CabAireDWGNumbersFormScreen.dart';
+import 'D03NumbersFormScreen.dart';
+import 'DWGNumbersFormScreen.dart';
+import 'PartSubLogFormScreen.dart';
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -45,14 +50,22 @@ class HomeScreen extends StatelessWidget {
                   _buildButton(context, 'LIBRARY', Colors.indigo, () {
                     _openNewTab('/library', 'Library');
                   }),
-                  _buildButton(context, 'PART SUB LOG', Colors.cyan, null),
+                  _buildButton(context, 'PART SUB LOG', Colors.cyan, () {
+                    _openFormPopup(context, PartSubLogFormScreen());
+                  }),
                   _buildButton(context, 'CHERYL\'S DO3 REPORT', Colors.blueAccent, null),
-                  _buildButton(context, 'DO3 NUMBERS', Colors.lightBlueAccent, null),
-                  _buildButton(context, 'DWG NUMBERS', Colors.deepPurpleAccent, null),
+                  _buildButton(context, 'DO3 NUMBERS', Colors.lightBlueAccent, () {
+                    _openFormPopup(context, D03NumbersFormScreen());
+                  }),
+                  _buildButton(context, 'DWG NUMBERS', Colors.deepPurpleAccent, () {
+                    _openFormPopup(context, DWGNumbersFormScreen());
+                  }),
                   _buildButton(context, 'ECO LOG', Colors.teal, null),
                   Container(), // Empty container to push the last two buttons to the right
                   Container(), // Another empty container to push the last two buttons to the right
-                  _buildButton(context, 'CAB AIRE DWG NUMBERS', Colors.lightBlue, null),
+                  _buildButton(context, 'CAB AIRE DWG NUMBERS', Colors.lightBlue, () {
+                    _openFormPopup(context, CabAireDWGNumberFormScreen());
+                  }),
                   _buildButton(context, 'ECR LOG', Colors.deepPurple, null),
                 ],
               ),
@@ -68,6 +81,20 @@ class HomeScreen extends StatelessWidget {
     final newUrl = currentUrl.replace(fragment: page).toString();
 
     js.context.callMethod('openNewTab', [newUrl, title]);
+  }
+  void _openFormPopup(BuildContext context, Widget formScreen) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Container(
+            width: 800,
+            height: 800,
+            child: formScreen,
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildButton(BuildContext context, String text, Color color, VoidCallback? onTap) {
