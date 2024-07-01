@@ -1,59 +1,72 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/cab_aire_dwg_numbers.dart';
+import '../models/eco_log.dart';
 
 class ApiService {
-  // final String baseUrl = 'https://localhost:44397/api/CabAireDWGNumber';
-  final String baseUrl = 'http://10.89.5.183:155/api/CabAireDWGNumber';
+  // final String baseUrl = 'https://localhost:44397/api/EcoLog';
 
-  Future<CabAireDWGNumber> fetchFirst() async {
+  final String baseUrl = 'http://10.89.5.183:155/api/EcoLog';
+
+  Future<EcoLog> fetchFirst() async {
     final response = await http.get(Uri.parse('$baseUrl/first'));
     if (response.statusCode == 200) {
-      return CabAireDWGNumber.fromJson(json.decode(response.body));
+      return EcoLog.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to load first record');
     }
   }
 
-  Future<CabAireDWGNumber> fetchLast() async {
+  Future<EcoLog> fetchLast() async {
     final response = await http.get(Uri.parse('$baseUrl/last'));
     if (response.statusCode == 200) {
-      return CabAireDWGNumber.fromJson(json.decode(response.body));
+      return EcoLog.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to load last record');
     }
   }
 
-  Future<CabAireDWGNumber> fetchNext(int currentNo) async {
-    final response = await http.get(Uri.parse('$baseUrl/next/$currentNo'));
+  Future<EcoLog> fetchNext(int currentNO) async {
+    final response = await http.get(Uri.parse('$baseUrl/next/$currentNO'));
     if (response.statusCode == 200) {
-      return CabAireDWGNumber.fromJson(json.decode(response.body));
+      return EcoLog.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to load next record');
     }
   }
 
-  Future<CabAireDWGNumber> fetchPrevious(int currentNo) async {
-    final response = await http.get(Uri.parse('$baseUrl/previous/$currentNo'));
+  Future<EcoLog> fetchPrevious(int currentNO) async {
+    final response = await http.get(Uri.parse('$baseUrl/previous/$currentNO'));
     if (response.statusCode == 200) {
-      return CabAireDWGNumber.fromJson(json.decode(response.body));
+      return EcoLog.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to load previous record');
     }
   }
 
-  Future<List<CabAireDWGNumber>> search(String searchTerm) async {
+  Future<List<EcoLog>> search(String searchTerm) async {
     final response = await http.get(Uri.parse('$baseUrl/search/$searchTerm'));
     if (response.statusCode == 200) {
       List<dynamic> list = json.decode(response.body);
-      return list.map((e) => CabAireDWGNumber.fromJson(e)).toList();
+      return list.map((e) => EcoLog.fromJson(e)).toList();
     } else {
       throw Exception('Failed to search records');
     }
   }
 
-  Future<void> create(CabAireDWGNumber cabAireDWGNumber) async {
-    final jsonData = json.encode(cabAireDWGNumber.toJson());
+  Future<void> createOrUpdate(EcoLog ecoLog) async {
+    final jsonData = json.encode(ecoLog.toJson());
+    final response = await http.post(
+      Uri.parse('$baseUrl/createOrUpdate'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonData,
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to create or update record');
+    }
+  }
+
+  Future<void> create(EcoLog ecoLog) async {
+    final jsonData = json.encode(ecoLog.toJson());
     final response = await http.post(
       Uri.parse('$baseUrl/create'),
       headers: {'Content-Type': 'application/json'},
@@ -68,8 +81,8 @@ class ApiService {
     }
   }
 
-  Future<void> update(int no, CabAireDWGNumber cabAireDWGNumber) async {
-    final jsonData = json.encode(cabAireDWGNumber.toJson());
+  Future<void> update(int no, EcoLog ecoLog) async {
+    final jsonData = json.encode(ecoLog.toJson());
     final response = await http.put(
       Uri.parse('$baseUrl/update/$no'),
       headers: {'Content-Type': 'application/json'},

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'Screens/CabAireDWGNumbersFormScreen.dart';
 import 'Screens/D03NumbersFormScreen.dart';
 import 'Screens/DWGNumbersFormScreen.dart';
+import 'Screens/EcoLogFormScreen.dart';
+import 'Screens/EcrLogFormScreen.dart';
 import 'Screens/HomeScreen.dart';
 import 'Screens/PartSubLogFormScreen.dart';
 import 'Screens/designServices/DesignServices.dart';
@@ -33,6 +35,8 @@ class MyApp extends StatelessWidget {
         '/d03numbersform': (context) => D03NumbersFormScreen(),
         '/dwgnumbersform': (context) => const DWGNumbersFormScreen(),
         '/cabairedwgnumbersform': (context) => CabAireDWGNumberFormScreen(),
+        '/ecologform': (context) => EcoLogFormScreen(),
+        '/ecrlogform': (context) => EcrLogFormScreen(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/') {
@@ -45,6 +49,12 @@ class MyApp extends StatelessWidget {
           return MaterialPageRoute(builder: (context) => const LibraryPage());
         } else if (settings.name == '/threelettercodeform') {
           return MaterialPageRoute(builder: (context) => const ThreeLetterCodeFormScreen());
+        } else if (settings.name == '/d03numbersform') {
+          return MaterialPageRoute(builder: (context) => const D03NumbersFormScreen());
+        } else if (settings.name == '/dwgnumbersform') {
+          return MaterialPageRoute(builder: (context) => const DWGNumbersFormScreen());
+        } else if (settings.name == '/ecologform') {
+          return MaterialPageRoute(builder: (context) => const EcoLogFormScreen());
         }
         return null;
       },

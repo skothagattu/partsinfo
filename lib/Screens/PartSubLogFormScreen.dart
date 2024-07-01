@@ -456,7 +456,9 @@ class _PartSubLogFormScreenState extends State<PartSubLogFormScreen> {
       appBar: AppBar(
         title: Text('Part Sub Log Form'),
       ),
-      body: Padding(
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
@@ -467,9 +469,11 @@ class _PartSubLogFormScreenState extends State<PartSubLogFormScreen> {
               _buildFormFields(),
               SizedBox(height: 20),
               if (!isNewLog)
-                ElevatedButton(
-                  onPressed: _createNewLog,
-                  child: Icon(Icons.add),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: _createNewLog,
+                    child: Icon(Icons.add),
+                  ),
                 ),
               if (isNewLog)
                 Row(

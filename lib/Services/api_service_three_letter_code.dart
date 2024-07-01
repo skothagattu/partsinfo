@@ -3,7 +3,8 @@ import 'package:http/http.dart' as http;
 import '../models/three_letter_code.dart';
 
 class ApiService {
-  final String baseUrl = 'https://localhost:44397/api/ThreeLetterCode';
+  // final String baseUrl = 'https://localhost:44397/api/ThreeLetterCode';
+  final String baseUrl = 'http://10.89.5.183:155/api/ThreeLetterCode';
 
   Future<ThreeLetterCode> fetchFirstCode() async {
     final response = await http.get(Uri.parse('$baseUrl/firstcode')); // Updated endpoint

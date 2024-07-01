@@ -60,7 +60,6 @@ class _D03NumbersFormScreenState extends State<D03NumbersFormScreen> {
         isLoading = false;
         errorMessage = '';
       });
-      print('Loaded first number: ${number.id}');
     } catch (e) {
       setState(() {
         isLoading = false;
@@ -82,13 +81,11 @@ class _D03NumbersFormScreenState extends State<D03NumbersFormScreen> {
         isLoading = false;
         errorMessage = '';
       });
-      print('Loaded last number: ${number.id}');
     } catch (e) {
       setState(() {
         isLoading = false;
         errorMessage = 'Failed to load data: $e';
       });
-      print('Error: $e');
     }
   }
 
@@ -109,13 +106,11 @@ class _D03NumbersFormScreenState extends State<D03NumbersFormScreen> {
           isLoading = false;
           errorMessage = '';
         });
-        print('Loaded next number: ${number.id}');
       } catch (e) {
         setState(() {
           isLoading = false;
           errorMessage = 'Failed to load data: $e';
         });
-        print('Error: $e');
       }
     }
   }
@@ -137,13 +132,11 @@ class _D03NumbersFormScreenState extends State<D03NumbersFormScreen> {
           isLoading = false;
           errorMessage = '';
         });
-        print('Loaded previous number: ${number.id}');
       } catch (e) {
         setState(() {
           isLoading = false;
           errorMessage = 'Failed to load data: $e';
         });
-        print('Error: $e');
       }
     }
   }
@@ -180,7 +173,6 @@ class _D03NumbersFormScreenState extends State<D03NumbersFormScreen> {
         isLoading = false;
         errorMessage = 'Failed to create new number: $e';
       });
-      print('Error: $e');
     }
   }
 
@@ -232,7 +224,7 @@ class _D03NumbersFormScreenState extends State<D03NumbersFormScreen> {
         total: currentNumber!.total,
       );
 
-      await apiService.create(newNumber);
+      await apiService.createOrUpdate(newNumber);
       setState(() {
         isLoading = false;
         errorMessage = '';
@@ -245,7 +237,6 @@ class _D03NumbersFormScreenState extends State<D03NumbersFormScreen> {
         isLoading = false;
       });
       _showErrorMessageDialog(e.toString());
-      print('Error: $e');
     }
   }
 
@@ -282,7 +273,6 @@ class _D03NumbersFormScreenState extends State<D03NumbersFormScreen> {
         isLoading = false;
         errorMessage = 'Failed to update number: $e';
       });
-      print('Error: $e');
     }
   }
 
@@ -440,23 +430,27 @@ class _D03NumbersFormScreenState extends State<D03NumbersFormScreen> {
       appBar: AppBar(
         title: Text('D03 Numbers Form'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSearchBar(),
-              SizedBox(height: 20),
-              _buildFormFields(),
-              SizedBox(height: 20),
-              if (!isNewNumber)
-                ElevatedButton(
-                  onPressed: _createNewNumber,
-                  child: Icon(Icons.add),
-                ),
-              if (isNewNumber)
-                Row(
+      body:isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
+          padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSearchBar(),
+               SizedBox(height: 20),
+                _buildFormFields(),
+                SizedBox(height: 20),
+                if (!isNewNumber)
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: _createNewNumber,
+                      child: Icon(Icons.add),
+                    ),
+                  ),
+               if (isNewNumber)
+                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ElevatedButton(

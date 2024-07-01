@@ -3,7 +3,8 @@ import 'package:http/http.dart' as http;
 import '../models/parts_sub_log.dart';
 
 class ApiService {
-  final String baseUrl = 'https://localhost:44397/api/SubLog';
+  // final String baseUrl = 'https://localhost:44397/api/SubLog';
+  final String baseUrl = 'http://10.89.5.183:155/api/SubLog';
 
   Future<PartSubLog> fetchFirstLog() async {
     final response = await http.get(Uri.parse('$baseUrl/first'));

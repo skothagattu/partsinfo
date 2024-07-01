@@ -3,7 +3,9 @@ import 'package:http/http.dart' as http;
 import '../models/dwg_numbers.dart';
 
 class ApiServiceDWGNumbers {
-  final String baseUrl = 'https://localhost:44397/api/DWGnumber';
+  // final String baseUrl = 'https://localhost:44397/api/DWGnumber';
+
+  final String baseUrl = 'http://10.89.5.183:155/api/DWGnumber';
 
   Future<DWGNumbers> fetchFirst() async {
     final response = await http.get(Uri.parse('$baseUrl/first'));
@@ -51,6 +53,17 @@ class ApiServiceDWGNumbers {
       return list.map((e) => DWGNumbers.fromJson(e)).toList();
     } else {
       throw Exception('Failed to search records');
+    }
+  }
+  Future<void> createOrUpdate(DWGNumbers dwgNumbers) async {
+    final jsonData = json.encode(dwgNumbers.toJson());
+    final response = await http.post(
+      Uri.parse('$baseUrl/createOrUpdate'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonData,
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to create or update record');
     }
   }
 

@@ -4,6 +4,8 @@ import 'dart:js' as js;
 import 'CabAireDWGNumbersFormScreen.dart';
 import 'D03NumbersFormScreen.dart';
 import 'DWGNumbersFormScreen.dart';
+import 'EcoLogFormScreen.dart';
+import 'EcrLogFormScreen.dart';
 import 'PartSubLogFormScreen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -44,9 +46,11 @@ class HomeScreen extends StatelessWidget {
                   _buildButton(context, 'PURCHASING', Colors.lightBlue, () {
                     _openNewTab('/purchasing', 'Purchasing');
                   }),
-                  _buildButton(context, 'DESIGN SERVICES', Colors.blue, () {
-                    _openNewTab('/designservices', 'Design Services');
-                  }),
+                  // _buildButton(context, 'DESIGN SERVICES', Colors.blue, () {
+                  //   _openNewTab('/designservices', 'Design Services');
+                  // }),
+                  _buildButton(context, 'DESIGN SERVICES', Colors.grey, null, isDisabled: true),
+
                   _buildButton(context, 'LIBRARY', Colors.indigo, () {
                     _openNewTab('/library', 'Library');
                   }),
@@ -60,13 +64,17 @@ class HomeScreen extends StatelessWidget {
                   _buildButton(context, 'DWG NUMBERS', Colors.deepPurpleAccent, () {
                     _openFormPopup(context, DWGNumbersFormScreen());
                   }),
-                  _buildButton(context, 'ECO LOG', Colors.teal, null),
+                  _buildButton(context, 'ECO LOG', Colors.teal, () {
+                    _openFormPopup(context, EcoLogFormScreen());
+                  }),
                   Container(), // Empty container to push the last two buttons to the right
                   Container(), // Another empty container to push the last two buttons to the right
                   _buildButton(context, 'CAB AIRE DWG NUMBERS', Colors.lightBlue, () {
                     _openFormPopup(context, CabAireDWGNumberFormScreen());
                   }),
-                  _buildButton(context, 'ECR LOG', Colors.deepPurple, null),
+                  _buildButton(context, 'ECR LOG', Colors.deepPurple, () {
+                    _openFormPopup(context, EcrLogFormScreen());
+                  }),
                 ],
               ),
             ),
@@ -97,9 +105,29 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildButton(BuildContext context, String text, Color color, VoidCallback? onTap) {
+  Widget _buildButton(BuildContext context, String text, Color color, VoidCallback? onTap, {bool isDisabled = false}) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: isDisabled
+          ? () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Notice'),
+              content: Text('This feature is under development. Please test other options.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+          : onTap,
       child: Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(

@@ -3,7 +3,8 @@ import 'package:http/http.dart' as http;
 import '../models/d03_numbers.dart';
 
 class ApiService {
-  final String baseUrl = 'https://localhost:44397/api/D03number';
+  // final String baseUrl = 'https://localhost:44397/api/D03number';
+  final String baseUrl = 'http://10.89.5.183:155/api/D03number';
 
   Future<D03numbers> fetchFirst() async {
     final response = await http.get(Uri.parse('$baseUrl/first'));
@@ -53,7 +54,17 @@ class ApiService {
       throw Exception('Failed to search records');
     }
   }
-
+  Future<void> createOrUpdate(D03numbers d03numbers) async {
+    final jsonData = json.encode(d03numbers.toJson());
+    final response = await http.post(
+      Uri.parse('$baseUrl/createOrUpdate'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonData,
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to create or update record');
+    }
+  }
   Future<void> create(D03numbers d03numbers) async {
     final jsonData = json.encode(d03numbers.toJson());
     print('Sending JSON data: $jsonData');

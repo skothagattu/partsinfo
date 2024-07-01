@@ -226,7 +226,7 @@ class _DWGNumbersFormScreenState extends State<DWGNumbersFormScreen> {
         total: currentRecord!.total,
       );
 
-      await apiService.create(newRecord);
+      await apiService.createOrUpdate(newRecord);
       setState(() {
         isLoading = false;
         errorMessage = '';
@@ -433,8 +433,10 @@ class _DWGNumbersFormScreenState extends State<DWGNumbersFormScreen> {
       appBar: AppBar(
         title: Text('DWG Numbers Form'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
+          padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -444,9 +446,11 @@ class _DWGNumbersFormScreenState extends State<DWGNumbersFormScreen> {
               _buildFormFields(),
               SizedBox(height: 20),
               if (!isNewRecord)
-                ElevatedButton(
-                  onPressed: _createNewRecord,
-                  child: Icon(Icons.add),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: _createNewRecord,
+                    child: Icon(Icons.add),
+                  ),
                 ),
               if (isNewRecord)
                 Row(

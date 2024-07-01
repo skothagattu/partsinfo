@@ -1,31 +1,32 @@
 import 'package:flutter/material.dart';
-import '../services/api_service_cab_aire_dwg_numbers.dart';
-import '../models/cab_aire_dwg_numbers.dart';
+import '../Services/api_service_eco_log.dart';
+import '../models/eco_log.dart';
 
-class CabAireDWGNumberFormScreen extends StatefulWidget {
-  const CabAireDWGNumberFormScreen({super.key});
+class EcoLogFormScreen extends StatefulWidget {
+  const EcoLogFormScreen({super.key});
 
   @override
-  _CabAireDWGNumberFormScreenState createState() => _CabAireDWGNumberFormScreenState();
+  _EcoLogFormScreenState createState() => _EcoLogFormScreenState();
 }
 
-class _CabAireDWGNumberFormScreenState extends State<CabAireDWGNumberFormScreen> {
+class _EcoLogFormScreenState extends State<EcoLogFormScreen> {
   final ApiService apiService = ApiService();
-  CabAireDWGNumber? currentRecord;
-  CabAireDWGNumber? originalRecord;
+  EcoLog? currentRecord;
+  EcoLog? originalRecord;
   bool isLoading = true;
   String errorMessage = '';
   bool hasUnsavedChanges = false;
   bool isNewRecord = false;
-  List<CabAireDWGNumber> searchResults = [];
+  List<EcoLog> searchResults = [];
   int currentSearchIndex = 0;
 
   final TextEditingController noController = TextEditingController();
-  final TextEditingController prefixController = TextEditingController();
   final TextEditingController descController = TextEditingController();
   final TextEditingController modelController = TextEditingController();
-  final TextEditingController origController = TextEditingController();
-  final TextEditingController dateController = TextEditingController();
+  final TextEditingController ecrController = TextEditingController();
+  final TextEditingController datE_LOGController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController datE_RELController = TextEditingController();
   final TextEditingController searchController = TextEditingController();
 
   @override
@@ -37,11 +38,12 @@ class _CabAireDWGNumberFormScreenState extends State<CabAireDWGNumberFormScreen>
   void _populateFields() {
     if (currentRecord != null) {
       noController.text = currentRecord!.no.toString();
-      prefixController.text = currentRecord!.prefix;
       descController.text = currentRecord!.desc;
       modelController.text = currentRecord!.model;
-      origController.text = currentRecord!.orig;
-      dateController.text = currentRecord!.date;
+      ecrController.text = currentRecord!.ecr;
+      datE_LOGController.text = currentRecord!.datE_LOG;
+      nameController.text = currentRecord!.name;
+      datE_RELController.text = currentRecord!.datE_REL;
       originalRecord = currentRecord?.copy();
     }
   }
@@ -149,13 +151,14 @@ class _CabAireDWGNumberFormScreenState extends State<CabAireDWGNumberFormScreen>
     try {
       final lastRecord = await apiService.fetchLast();
       setState(() {
-        currentRecord = CabAireDWGNumber(
+        currentRecord = EcoLog(
           no: 0,
-          prefix: '',
           desc: '',
           model: '',
-          orig: '',
-          date: '',
+          ecr: '',
+          datE_LOG: '',
+          name: '',
+          datE_REL: '',
           position: lastRecord.total + 1,
           total: lastRecord.total + 1,
         );
@@ -174,11 +177,12 @@ class _CabAireDWGNumberFormScreenState extends State<CabAireDWGNumberFormScreen>
 
   void _clearFields() {
     noController.clear();
-    prefixController.clear();
     descController.clear();
     modelController.clear();
-    origController.clear();
-    dateController.clear();
+    ecrController.clear();
+    datE_LOGController.clear();
+    nameController.clear();
+    datE_RELController.clear();
     setState(() {
       hasUnsavedChanges = false;
       isNewRecord = false;
@@ -187,11 +191,12 @@ class _CabAireDWGNumberFormScreenState extends State<CabAireDWGNumberFormScreen>
 
   bool _hasDataInFields() {
     return noController.text.isNotEmpty ||
-        prefixController.text.isNotEmpty ||
         descController.text.isNotEmpty ||
         modelController.text.isNotEmpty ||
-        origController.text.isNotEmpty ||
-        dateController.text.isNotEmpty;
+        ecrController.text.isNotEmpty ||
+        datE_LOGController.text.isNotEmpty ||
+        nameController.text.isNotEmpty ||
+        datE_RELController.text.isNotEmpty;
   }
 
   void _submitRecord() async {
@@ -206,18 +211,19 @@ class _CabAireDWGNumberFormScreenState extends State<CabAireDWGNumberFormScreen>
       isLoading = true;
     });
     try {
-      final newRecord = CabAireDWGNumber(
+      final newRecord = EcoLog(
         no: int.parse(noController.text),
-        prefix: prefixController.text,
         desc: descController.text,
         model: modelController.text,
-        orig: origController.text,
-        date: dateController.text,
+        ecr: ecrController.text,
+        datE_LOG: datE_LOGController.text,
+        name: nameController.text,
+        datE_REL: datE_RELController.text,
         position: currentRecord!.position,
         total: currentRecord!.total,
       );
 
-      await apiService.create(newRecord);
+      await apiService.createOrUpdate(newRecord);
       setState(() {
         isLoading = false;
         errorMessage = '';
@@ -241,13 +247,14 @@ class _CabAireDWGNumberFormScreenState extends State<CabAireDWGNumberFormScreen>
       isLoading = true;
     });
     try {
-      final updatedRecord = CabAireDWGNumber(
+      final updatedRecord = EcoLog(
         no: int.parse(noController.text),
-        prefix: prefixController.text,
         desc: descController.text,
         model: modelController.text,
-        orig: origController.text,
-        date: dateController.text,
+        ecr: ecrController.text,
+        datE_LOG: datE_LOGController.text,
+        name: nameController.text,
+        datE_REL: datE_RELController.text,
         position: currentRecord!.position,
         total: currentRecord!.total,
       );
@@ -419,7 +426,7 @@ class _CabAireDWGNumberFormScreenState extends State<CabAireDWGNumberFormScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Cab Aire DWG Number Form'),
+        title: Text('Eco Log Form'),
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
@@ -435,10 +442,10 @@ class _CabAireDWGNumberFormScreenState extends State<CabAireDWGNumberFormScreen>
               SizedBox(height: 20),
               if (!isNewRecord)
                 Center(
-                  child: ElevatedButton(
-                    onPressed: _createNewRecord,
-                    child: Icon(Icons.add),
-                  ),
+                    child: ElevatedButton(
+                      onPressed: _createNewRecord,
+                      child: Icon(Icons.add),
+                    ),
                 ),
               if (isNewRecord)
                 Row(
@@ -543,8 +550,7 @@ class _CabAireDWGNumberFormScreenState extends State<CabAireDWGNumberFormScreen>
               : null,
         ),
         Spacer(),
-        if (currentRecord != null)
-          Text('${currentRecord!.position} of ${currentRecord!.total}'),
+        if (currentRecord != null) Text('${currentRecord!.position} of ${currentRecord!.total}'),
         Spacer(),
         IconButton(
           icon: Icon(Icons.navigate_next),
@@ -585,9 +591,7 @@ class _CabAireDWGNumberFormScreenState extends State<CabAireDWGNumberFormScreen>
         Text('${currentSearchIndex + 1} of ${searchResults.length}'),
         IconButton(
           icon: Icon(Icons.arrow_forward),
-          onPressed: currentSearchIndex < searchResults.length - 1
-              ? _loadNextSearchResult
-              : null,
+          onPressed: currentSearchIndex < searchResults.length - 1 ? _loadNextSearchResult : null,
         ),
       ],
     );
@@ -600,26 +604,30 @@ class _CabAireDWGNumberFormScreenState extends State<CabAireDWGNumberFormScreen>
           children: [
             Expanded(child: _buildTextField('NO', noController)),
             SizedBox(width: 16),
-            Expanded(child: _buildTextField('PREFIX', prefixController)),
-            SizedBox(width: 16),
             Expanded(child: _buildTextField('DESC', descController)),
+            SizedBox(width: 16),
+            Expanded(child: _buildTextField('MODEL', modelController)),
           ],
         ),
         Row(
           children: [
-            Expanded(child: _buildTextField('MODEL', modelController)),
+            Expanded(child: _buildTextField('ECR', ecrController)),
             SizedBox(width: 16),
-            Expanded(child: _buildTextField('ORIG', origController)),
+            Expanded(child: _buildTextField('DATE_LOG', datE_LOGController)),
             SizedBox(width: 16),
-            Expanded(child: _buildTextField('DATE', dateController)),
+            Expanded(child: _buildTextField('NAME', nameController)),
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(child: _buildTextField('DATE_REL', datE_RELController)),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller,
-      {int maxLines = 1}) {
+  Widget _buildTextField(String label, TextEditingController controller, {int maxLines = 1}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
